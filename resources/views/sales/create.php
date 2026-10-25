@@ -1,0 +1,20 @@
+<?php $title = 'เปิดบิลขาย'; require __DIR__.'/../layouts/header.php'; ?>
+<?php require __DIR__.'/../partials/messages.php'; ?>
+<div class="page-actions"><p>เลือกสินค้าและบริการ แล้วตรวจสอบยอดก่อนชำระ</p><a href="<?= e(route('sales.index')) ?>">ดูรายการขาย</a></div>
+<form id="checkout-form" method="post" action="<?= e(route('sales.store')) ?>">
+<?= csrf_field() ?><input name="checkout_token" type="hidden" value="<?= e($token) ?>">
+<div class="pos-layout">
+<section class="card catalog-panel"><h2>สินค้าและบริการ</h2><label for="catalog-search">ค้นหาชื่อ / รหัสสินค้า</label><input id="catalog-search" type="search" placeholder="พิมพ์เพื่อค้นหา" autocomplete="off"><div class="catalog-tabs"><button type="button" data-catalog-type="all" class="button-secondary">ทั้งหมด</button><button type="button" data-catalog-type="product" class="button-secondary">สินค้า</button><button type="button" data-catalog-type="service" class="button-secondary">บริการ</button></div><div id="catalog-items" class="catalog-grid"></div></section>
+<section class="card cart-panel"><h2>ตะกร้าขาย</h2><label for="customer_id">ลูกค้า</label><select id="customer_id" name="customer_id"><option value="">ลูกค้าทั่วไป (ไม่สะสมจำนวนครั้ง)</option><?php foreach ($customers as $customer): ?><option value="<?= e($customer->id) ?>" <?= (string) \App\Support\FormValue::old('customer_id') === (string) $customer->id ? 'selected' : '' ?>><?= e(($customer->name ?: 'ไม่ระบุชื่อ').' · '.$customer->phone.' · '.$customer->total_visits.' ครั้ง') ?></option><?php endforeach; ?></select>
+<div class="table-wrap"><table class="cart-table"><thead><tr><th>รายการ / ช่าง</th><th>จำนวน</th><th>รวม</th><th></th></tr></thead><tbody id="cart-items"></tbody></table></div><p id="cart-notice" class="notice error" role="status" hidden></p>
+<label for="promotion_id">โปรโมชั่น</label><select id="promotion_id" name="promotion_id"><option value="">ไม่ใช้โปรโมชั่น</option><?php foreach ($promotions as $promotion): ?><option value="<?= e($promotion->id) ?>" <?= (string) \App\Support\FormValue::old('promotion_id') === (string) $promotion->id ? 'selected' : '' ?>><?= e($promotion->name.' (ครบ '.$promotion->visit_required.' ครั้ง)') ?></option><?php endforeach; ?></select><small class="help">ระบบตรวจจำนวนครั้งและการใช้สิทธิ์ซ้ำเมื่อชำระเงิน</small>
+<dl class="totals"><div><dt>ยอดก่อนส่วนลด</dt><dd id="subtotal-preview">0.00</dd></div><div><dt>ส่วนลด</dt><dd id="discount-preview">0.00</dd></div><div class="grand-total"><dt>ยอดสุทธิ (บาท)</dt><dd id="total-preview">0.00</dd></div></dl>
+<label for="method">วิธีชำระเงิน</label><select id="method" name="method"><?php foreach (['cash' => 'เงินสด', 'promptpay' => 'พร้อมเพย์', 'transfer' => 'โอนเงิน', 'card' => 'บัตร'] as $key => $label): ?><option value="<?= e($key) ?>" <?= \App\Support\FormValue::old('method', 'cash') === $key ? 'selected' : '' ?>><?= e($label) ?></option><?php endforeach; ?></select>
+<div id="reference-field"><label for="ref_no">เลขอ้างอิงการชำระเงิน *</label><input id="ref_no" name="ref_no" maxlength="255" value="<?= e(\App\Support\FormValue::old('ref_no')) ?>"></div>
+<label for="received">เงินที่รับ (บาท)</label><input id="received" name="received" type="number" step="0.01" min="0" max="99999999.99" required value="<?= e(\App\Support\FormValue::old('received')) ?>"><p class="change-display">เงินทอน <strong id="change-preview">0.00</strong> บาท</p>
+<button id="checkout-submit" class="checkout-button" type="submit">ยืนยันชำระเงิน</button><p class="help">ยอดที่แสดงเป็นตัวอย่าง ระบบจะตรวจราคาและสต็อกอีกครั้งเมื่อชำระ</p>
+</section></div></form>
+<noscript><p class="notice error">หน้าขายต้องเปิด JavaScript เพื่อเลือกสินค้าและบริการ</p></noscript>
+<script id="pos-data" type="application/json"><?= json_encode(['catalogue' => $catalogue, 'stylists' => $stylists, 'promotions' => $promotions, 'oldItems' => $oldItems], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) ?></script>
+<script src="<?= e(asset('js/pos.js')) ?>" defer></script>
+<?php require __DIR__.'/../layouts/footer.php'; ?>

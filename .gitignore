@@ -1,0 +1,7 @@
+*.log
+.DS_Store
+.phpunit.result.cache
+/.phpunit.cache
+/public/hot
+/public/storage
+Thumbs.db

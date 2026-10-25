@@ -1,0 +1,8 @@
+<?php $title = $product->exists ? 'แก้ไขสินค้า' : 'เพิ่มสินค้า'; require __DIR__.'/../layouts/header.php'; ?>
+<section class="card"><?php require __DIR__.'/../partials/messages.php'; ?>
+<form method="post" action="<?= e($product->exists ? route('products.update', $product) : route('products.store')) ?>"><?= csrf_field() ?><?= $product->exists ? method_field('patch') : '' ?>
+<?php foreach (['sku' => 'รหัสสินค้า (SKU)', 'name' => 'ชื่อสินค้า', 'unit' => 'หน่วย'] as $field => $label): ?><label for="<?= e($field) ?>"><?= e($label) ?> *</label><input id="<?= e($field) ?>" name="<?= e($field) ?>" required maxlength="<?= ['sku' => 30, 'name' => 255, 'unit' => 20][$field] ?>" value="<?= e(\App\Support\FormValue::old($field, $product->$field)) ?>"><?php endforeach; ?>
+<?php foreach (['cost_price' => 'ต้นทุน', 'sell_price' => 'ราคาขาย', 'min_stock' => 'จุดเตือนสต็อก'] as $field => $label): ?><label for="<?= e($field) ?>"><?= e($label) ?> *</label><input id="<?= e($field) ?>" name="<?= e($field) ?>" type="number" min="0" max="<?= $field === 'min_stock' ? '2147483647' : '99999999.99' ?>" step="<?= $field === 'min_stock' ? '1' : '0.01' ?>" required value="<?= e(\App\Support\FormValue::old($field, $product->$field)) ?>"><?php endforeach; ?>
+<input name="is_active" type="hidden" value="0"><label class="checkbox"><input name="is_active" type="checkbox" value="1" <?= \App\Support\FormValue::old('is_active', $product->is_active) ? 'checked' : '' ?>> เปิดขาย</label><p class="help">สต็อกเปลี่ยนได้จากหน้ารับเข้า/ปรับยอด พร้อมบันทึกประวัติเท่านั้น</p>
+<div class="actions"><button>บันทึกสินค้า</button><a href="<?= e(route('products.index')) ?>">กลับรายการ</a></div></form></section>
+<?php require __DIR__.'/../layouts/footer.php'; ?>
